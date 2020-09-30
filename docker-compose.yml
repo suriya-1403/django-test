@@ -1,13 +1,23 @@
 version: "3.8"
 
-x-service-volume: &service-volumes
+x-service-volumes: &service-volumes
     - ./:/app/:rw,cached
+
+x-database-variables: $database-variables
+    POSTGRES_DB: postgres
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres    
+
+x-app-variables: &app-variables
+    <<: *database-variables
+    POSTGRES_HOST: postgres
 
 services:
     website:
         image: djangotest_website_test:latest
         command: python manage.py runserver 0.0.0.0:8000
         volumes: *service-volumes
+        environment: *pp-variables
         depends_on: 
             - db_migrate
         ports: 
@@ -17,3 +27,11 @@ services:
         image: djangotest_website_test:latest
         command: python manage.py migrate
         volumes: *service-volumes
+        environment: *pp-variables
+
+    postgres:
+        image: postgres
+        ports: 
+            - "54321:54321"
+        environment: *database-variables
+        
